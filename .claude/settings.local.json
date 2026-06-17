@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(python --version)",
+      "PowerShell(py --version)",
+      "PowerShell(python -m venv d:\\\\Development\\\\email-to-kindle\\\\venv)",
+      "PowerShell(d:\\\\Development\\\\email-to-kindle\\\\venv\\\\Scripts\\\\python.exe -m pip install --quiet --upgrade pip)",
+      "PowerShell(d:\\\\Development\\\\email-to-kindle\\\\venv\\\\Scripts\\\\python.exe -m pip install -r d:\\\\Development\\\\email-to-kindle\\\\app\\\\requirements.txt)",
+      "PowerShell(d:\\\\Development\\\\email-to-kindle\\\\venv\\\\Scripts\\\\python.exe d:\\\\Development\\\\email-to-kindle\\\\_smoke.py)",
+      "PowerShell(d:\\\\Development\\\\email-to-kindle\\\\venv\\\\Scripts\\\\python.exe d:\\\\Development\\\\email-to-kindle\\\\_smtp_test.py)",
+      "PowerShell(d:\\\\Development\\\\email-to-kindle\\\\venv\\\\Scripts\\\\python.exe -c \"import sys; sys.path.insert\\(0, r'd:\\\\Development\\\\email-to-kindle\\\\app'\\); from config import settings; from services import mailer; print\\('OK | verify_hostname=', settings.SMTP_VERIFY_HOSTNAME, '| host=', settings.SMTP_HOST, '| port=', settings.SMTP_PORT, '| sender=', settings.SENDER_EMAIL\\)\")",
+      "PowerShell(d:\\\\Development\\\\email-to-kindle\\\\venv\\\\Scripts\\\\python.exe d:\\\\Development\\\\email-to-kindle\\\\_send_test.py)",
+      "PowerShell(d:\\\\Development\\\\email-to-kindle\\\\venv\\\\Scripts\\\\python.exe d:\\\\Development\\\\email-to-kindle\\\\_i18n_smoke.py)"
+    ]
+  }
+}
