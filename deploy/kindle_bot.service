@@ -1,0 +1,30 @@
+# Kindle Sender Bot — systemd service
+# Install:
+#   cp deploy/kindle_bot.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable --now kindle_bot
+#   journalctl -u kindle_bot -f      (the app also writes logs/bot.log)
+
+[Unit]
+Description=Kindle Sender Telegram Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/bots/kindle_bot/app
+ExecStart=/opt/bots/kindle_bot/venv/bin/python bot.py
+Restart=on-failure
+RestartSec=5s
+
+# No EnvironmentFile needed: the bot loads /opt/bots/kindle_bot/.env itself via
+# pydantic-settings (path is derived from the source location). Set MODE=webhook
+# there before starting.
+
+# Light hardening — the bot only writes under /opt/bots/kindle_bot and uses /tmp.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
