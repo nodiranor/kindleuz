@@ -91,6 +91,7 @@ async def on_confirm(
         await mailer.send_to_kindle(
             user.kindle_email, path, filename, convert=user.convert_enabled
         )
+        logger.info("Relayed %r to %s (user %s)", filename, user.kindle_email, callback.from_user.id)
 
         today = date.today()
         user.sent_today = user.sent_today + 1 if user.last_sent_date == today else 1

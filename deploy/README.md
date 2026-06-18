@@ -1,11 +1,17 @@
 # Deploying in webhook mode
 
 Artifacts in this folder:
-- `nginx/kindle_bot.conf` — TLS reverse proxy; forwards `/tg/` → `127.0.0.1:8001`
+- `nginx/kindle_bot-bootstrap.conf` — HTTP-only, used once to obtain the first cert
+- `nginx/kindle_bot.conf` — final TLS reverse proxy; forwards `/tg/` → `127.0.0.1:8001`
 - `kindle_bot.service` — systemd unit
 
 The webhook **secret** and **path** are already generated and stored in your local
 `.env` (`WEBHOOK_SECRET`, `WEBHOOK_PATH=/tg/…`). Reuse the same values on the VPS.
+
+> **Paths:** this guide uses `/opt/bots/kindle_bot` as the install dir — substitute
+> your actual path everywhere (e.g. `/tg_bots/kindleuz`). The Nginx config is
+> path-independent (it only proxies to `127.0.0.1:8001`); only the systemd unit
+> and the `.env` location depend on it.
 
 ## 1. Code + virtualenv
 ```bash
@@ -27,14 +33,26 @@ chmod 600 /opt/bots/kindle_bot/.env
 chown -R www-data:www-data /opt/bots/kindle_bot
 ```
 
-## 3. TLS + Nginx
+## 3. TLS + Nginx (bootstrap HTTP → issue cert → enable TLS)
+The 443 server can't load until the cert exists, so bring nginx up HTTP-only first.
 ```bash
-apt install nginx certbot python3-certbot-nginx -y
-certbot --nginx -d amerikadan.uz
-cp deploy/nginx/kindle_bot.conf /etc/nginx/sites-available/
-ln -s /etc/nginx/sites-available/kindle_bot.conf /etc/nginx/sites-enabled/
+apt install nginx certbot -y
+mkdir -p /var/www/certbot
+
+# 3a. HTTP-only config so nginx runs and can serve the ACME challenge:
+cp deploy/nginx/kindle_bot-bootstrap.conf /etc/nginx/sites-available/kindle_bot.conf
+ln -sf /etc/nginx/sites-available/kindle_bot.conf /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+
+# 3b. Issue the cert via webroot (writes only to /etc/letsencrypt, not nginx):
+certbot certonly --webroot -w /var/www/certbot -d amerikadan.uz --agree-tos -m you@example.com -n
+
+# 3c. Swap in the full TLS config (cert now exists) and reload:
+cp deploy/nginx/kindle_bot.conf /etc/nginx/sites-available/kindle_bot.conf
 nginx -t && systemctl reload nginx
 ```
+Renewals are automatic (certbot.timer) and keep working because the `/.well-known/`
+location stays in the HTTP block.
 
 ## 4. Start the service
 ```bash
